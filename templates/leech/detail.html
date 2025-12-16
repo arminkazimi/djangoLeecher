@@ -18,8 +18,10 @@
         <p id="progress-text">{{ job.percent_display }}</p>
     </div>
 
-    <div id="download" style="display: {{ job.download.url|yesno:'block,none' }};">
-        <a class="button is-success" href="{{ job.download.url }}">Download result</a>
+    <div id="download" style="display: {% if download_url %}block{% else %}none{% endif %};">
+        {% if download_url %}
+            <a class="button is-success" href="{{ download_url }}">Download result</a>
+        {% endif %}
     </div>
 
     <div id="error" class="notification is-danger" style="display: none;"></div>
