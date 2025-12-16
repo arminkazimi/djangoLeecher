@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Torrent Leecher</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body class="section">
+<div class="container">
+    <h1 class="title">Torrent Leecher</h1>
+    {% if error %}
+        <article class="message is-danger">
+            <div class="message-body">{{ error }}</div>
+        </article>
+    {% endif %}
+    <div class="box">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Magnet link</label>
+                <div class="control">
+                    <input class="input" type="text" name="magnet_link" placeholder="Paste magnet URI">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">or upload .torrent</label>
+                <div class="control">
+                    <input class="input" type="file" name="torrent_file" accept=".torrent">
+                </div>
+            </div>
+            <div class="field is-grouped">
+                <div class="control">
+                    <button class="button is-link" type="submit">Start leech</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <h2 class="subtitle">Recent jobs</h2>
+    {% if jobs %}
+        <table class="table is-fullwidth">
+            <thead>
+            <tr>
+                <th>Created</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for job in jobs %}
+                <tr>
+                    <td>{{ job.created_at }}</td>
+                    <td>{{ job.get_source_type_display }}</td>
+                    <td>{{ job.get_status_display }}</td>
+                    <td>{{ job.percent_display }}</td>
+                    <td><a class="button is-small" href="{% url 'leech:detail' job.id %}">View</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No leech jobs yet.</p>
+    {% endif %}
+</div>
+</body>
+</html>

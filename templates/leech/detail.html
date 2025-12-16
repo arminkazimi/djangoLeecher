@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leech job {{ job.id }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body class="section">
+<div class="container">
+    <h1 class="title">Leech job {{ job.id }}</h1>
+    <p><strong>Created:</strong> {{ job.created_at }}</p>
+    <p><strong>Source:</strong> {{ job.get_source_type_display }}</p>
+    <p><strong>Status:</strong> <span id="status">{{ job.get_status_display }}</span></p>
+
+    <div class="field">
+        <label class="label">Progress</label>
+        <progress class="progress is-link" id="progress" value="{{ job.progress }}" max="100">{{ job.percent_display }}</progress>
+        <p id="progress-text">{{ job.percent_display }}</p>
+    </div>
+
+    <div id="download" style="display: {{ job.download.url|yesno:'block,none' }};">
+        <a class="button is-success" href="{{ job.download.url }}">Download result</a>
+    </div>
+
+    <div id="error" class="notification is-danger" style="display: none;"></div>
+
+    <a class="button" href="{% url 'leech:home' %}">Back</a>
+</div>
+
+<script>
+    const statusLabel = document.getElementById('status');
+    const progressBar = document.getElementById('progress');
+    const progressText = document.getElementById('progress-text');
+    const downloadBox = document.getElementById('download');
+    const errorBox = document.getElementById('error');
+
+    const evtSource = new EventSource("{% url 'leech:stream' job.id %}");
+    evtSource.onmessage = function (event) {
+        const payload = JSON.parse(event.data);
+        statusLabel.textContent = payload.status_display;
+        progressBar.value = payload.progress;
+        progressText.textContent = `${payload.progress.toFixed(0)}%`;
+
+        if (payload.download_url) {
+            downloadBox.style.display = 'block';
+            downloadBox.innerHTML = `<a class="button is-success" href="${payload.download_url}">Download result</a>`;
+        }
+
+        if (payload.error) {
+            errorBox.style.display = 'block';
+            errorBox.textContent = payload.error;
+        }
+
+        if (payload.status === 'completed' || payload.status === 'failed') {
+            evtSource.close();
+        }
+    };
+</script>
+</body>
+</html>
