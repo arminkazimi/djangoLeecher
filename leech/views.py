@@ -78,7 +78,15 @@ def home(request: HttpRequest) -> HttpResponse:
 
 def detail(request: HttpRequest, job_id: str) -> HttpResponse:
     job = get_object_or_404(LeechJob, pk=job_id)
-    return render(request, 'leech/detail.html', {'job': job})
+    download_url = job.download.url if job.download and job.download.name else ''
+    return render(
+        request,
+        'leech/detail.html',
+        {
+            'job': job,
+            'download_url': download_url,
+        },
+    )
 
 
 def stream(request: HttpRequest, job_id: str) -> StreamingHttpResponse:
